@@ -25,11 +25,13 @@ func getTracks(w http.ResponseWriter, r *http.Request){
 
   trackRows, err := db.Queryx("SELECT * FROM tracks WHERE name LIKE ?","%" + title + "%")
   if len(trackRows) == 0 {
-    // send 204
+    w.WriteHeader(http.StatusNoContent)
     log.Fatal("no data found")
+    return
   } else if err != nil {
-    // send 404
+    w.WriteHeader(http.StatusNotFound)
     log.Fatal("unable to get data", err)
+    return
   }
   defer trackRows.Close()
   
@@ -39,8 +41,9 @@ func getTracks(w http.ResponseWriter, r *http.Request){
     var track Track
     err = trackRows.StructScan(&track)
     if err != nil {
-      // send 404
+      w.WriteHeader(http.StatusNotFound)
       log.Fatal("unable to read data", err)
+      return
     }
 
     tracks = append(tracks, track)
